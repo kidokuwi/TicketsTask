@@ -7,7 +7,7 @@ import msvcrt,time
 import threading
 from  tcp_by_size import send_with_size ,recv_by_size
 
-# com1g
+# com1
 
 input_data = ""
 
