@@ -51,9 +51,9 @@ def main(ip, user_name):
             input_data = ""
             if data[:2] == "P:":
                 fields = data.split(":")
-                msg = "PRV|" + user_name + "|" + fields[1] + "|" + fields[2]
+                msg = "PRVM|" + user_name + "|" + fields[1] + "|" + fields[2]
             else:
-                msg = "PUB|" + user_name + "|" + data
+                msg = "PUBM|" + user_name + "|" + data
             send_with_size(cli_s,msg)
 
         try:
