@@ -18,17 +18,17 @@ def handle_message(data, user_name):
     fields = data.split("|")
     msg_type = fields[0]
 
-    if msg_type == "PUB":
+    if msg_type == "PUBM":
         from_user = fields[1]
         public_msg = fields[2]
         for user in async_msg.sock_by_user.keys():
             if user != user_name:
-                async_msg.put_msg_by_user("MSG|" + from_user + "|" + public_msg,user)
-    if msg_type == "PRV":
+                async_msg.put_msg_by_user("MSGR|" + from_user + "|" + public_msg,user)
+    if msg_type == "PRVM":
         from_user = fields[1]
         to_user = fields[2]
         msg = fields[3]
-        async_msg.put_msg_by_user("MSG|" + from_user + "|" + msg,to_user)
+        async_msg.put_msg_by_user("MSGR|" + from_user + "|" + msg,to_user)
 
     return to_send
 
@@ -56,7 +56,7 @@ def handl_client(sock , tid):
     exit_thread = False
 
     print ("New Client num " + str(tid))
-    to_send = "NAM|<uname>:<pass>"
+    to_send = "NAME|<uname>:<pass>"
 
     got_name = False;
     while not got_name:
@@ -66,9 +66,9 @@ def handl_client(sock , tid):
             print ("Client disconnected")
             exit_thread = True
             break
-        if data[:3] == "NMR" and len(data) > 6 :
+        if data[:4] == "NAMR" and len(data) > 6 :
             got_name = True
-            fields = data[4:].split(':')
+            fields = data[5:].split(':')
             user_name =  fields[0]
             password = fields[1]
             if check_user_pass(user_name,password):
