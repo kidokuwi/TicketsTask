@@ -11,6 +11,9 @@ from tcp_by_size import send_with_size, recv_by_size
 
 input_data = ""
 
+my_score = 0
+my_card_num = 150
+
 
 class input_thread(threading.Thread):
     """
@@ -22,14 +25,39 @@ class input_thread(threading.Thread):
 
     def run(self):
         global input_data
+        global my_score
         time.sleep(2)
         while input_data != 'q':
-            input_data = input("Enter_data to send>")
+            print("Your current score is: " + str(my_score) + "\n Your current number is :" + str(my_card_num))
+            print("--------------------")
+            print("1: Private message to...\n")
+            print("2: Public message...\n")
+            print("3: Request other user's number...\n")
+            print("4: Request maximum number...\n")
+            print("5: Change my number...\n")
+            print("6: Exit...\n")
+            input_data = craft_message(input("Enter num: "))
             time.sleep(0.2)  # prevent busy waiting
+
+def craft_message(num):
+    if num == 1:
+        return "PRVM|" + user_name + "|" + input("Enter target: ") + "|" + input("Enter message contents: ")
+    elif num == 2:
+        return "PUBM|" + user_name + "|" + input("Enter message contents: ")
+    elif num == 3:
+        return "NUMG|" + input("Enter target user: ")
+    elif num == 4:
+        return "MAXG"
+    elif num == 5:
+        return "SWIC|" + input("Enter new num: ")
+    elif num == 6:
+        return "q"
 
 
 def main(ip, user_name):
     global input_data
+    global my_score
+    global my_card_num
 
     cli_s = socket.socket()
     if not ip or len(ip) < 7:
@@ -37,7 +65,6 @@ def main(ip, user_name):
     cli_s.connect((ip, 33446))
 
     cli_s.settimeout(0.3)
-    print("For Private type P:name:<message>\n")
 
     input_t = input_thread()
     input_t.start()
@@ -49,12 +76,17 @@ def main(ip, user_name):
         if input_data != "":
             data = input_data
             input_data = ""
-            if data[:2] == "P:":
-                fields = data.split(":")
-                msg = "PRVM|" + user_name + "|" + fields[1] + "|" + fields[2]
-            else:
-                msg = "PUBM|" + user_name + "|" + data
-                print(fields[1] + ": " + fields[2])
+            fields = data.split("|")
+            if (fields[0] == "PRVM"):
+                msg = fields[0] + "|" + fields[1] + "|" + fields[2] + "|" + fields[3]
+            elif (fields[0] == "PUBM"):
+                msg = fields[0] + "|" + fields[1] + "|" + fields[2]
+            elif (fields[0] == "NUMG"):
+                msg = fields[0] + "|" + fields[1] + "|" + fields[2]
+            elif (fields[0] == "MAXG"):
+                msg = fields[0] + "|" + fields[1]
+            elif (fields[0] == "SWIC"):
+                msg = fields[0] + "|" + fields[1] + "|" + fields[2]
             send_with_size(cli_s, msg)
 
         try:
