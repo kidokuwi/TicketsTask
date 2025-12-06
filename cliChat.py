@@ -1,5 +1,6 @@
 __author__ = 'Yoav_Sarig_and_Ido_Keysar'
 
+import random
 from sys import argv
 
 import socket
@@ -12,6 +13,7 @@ input_data = ""
 my_score = 0
 my_card_num = 150
 users_nums = {}
+user_name = ""
 
 class input_thread(threading.Thread):
     """
@@ -39,6 +41,7 @@ class input_thread(threading.Thread):
             time.sleep(0.2)  # prevent busy waiting
 
 def craft_message(num_str):
+    global user_name
     num = int(num_str)
     if num == 1:
         return "PRVM|" + user_name + "|" + input("Enter target: ") + "|" + input("Enter message contents: ")
@@ -58,6 +61,7 @@ def main(ip, user_name):
     global input_data
     global my_score
     global my_card_num
+    my_card_num = random.randint(1,999)
 
     cli_s = socket.socket()
     if not ip or len(ip) < 7:
@@ -77,16 +81,17 @@ def main(ip, user_name):
             data = input_data
             input_data = ""
             fields = data.split("|")
-            if (fields[0] == "PRVM"):
-                msg = fields[0] + "|" + fields[1] + "|" + fields[2] + "|" + fields[3]
-            elif (fields[0] == "PUBM"):
-                msg = fields[0] + "|" + fields[1] + "|" + fields[2]
-            elif (fields[0] == "NUMG"):
-                msg = fields[0] + "|" + fields[1]
-            elif (fields[0] == "MAXG"):
-                msg = fields[0]
-            elif (fields[0] == "SWIC"):
-                msg = fields[0] + "|" + fields[1]
+            msg = fields[0]
+            if msg == "PRVM":
+                msg = msg + "|" + fields[1] + "|" + fields[2] + "|" + fields[3]
+            elif msg == "PUBM":
+                msg = msg + "|" + fields[1] + "|" + fields[2]
+            elif msg == "NUMG":
+                msg = msg + "|" + fields[1]
+            elif msg == "MAXG":
+                msg = msg
+            elif msg == "SWIC":
+                msg = msg + "|" + fields[1]
             send_with_size(cli_s, msg)
 
         try:
@@ -106,7 +111,6 @@ def main(ip, user_name):
                 users_nums[fields[1]] = int(fields[2])
                 print("Updated users numbers:", users_nums)
             elif msg_type == "SWIR":
-                global my_card_num
                 my_card_num = int(fields[1])
                 print(f"your num changed to: {my_card_num}")
 
