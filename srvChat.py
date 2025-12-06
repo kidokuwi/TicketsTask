@@ -75,6 +75,7 @@ def handl_client(sock , tid):
     :return:
     """
     global async_msg
+    global user_nums
 
     user_name = ""
     exit_thread = False
@@ -97,6 +98,7 @@ def handl_client(sock , tid):
             password = fields[1]
             if check_user_pass(user_name,password):
                 async_msg.sock_by_user[user_name] = sock
+                user_nums[user_name] = 150
             else:
                 exit_thread = True
     sock.settimeout(0.3)
