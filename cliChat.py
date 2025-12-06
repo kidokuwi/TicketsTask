@@ -1,4 +1,4 @@
-__author__ = 'YOAV'
+__author__ = 'Yoav_Sarig_and_Ido_Keysar'
 
 from sys import argv
 
@@ -6,8 +6,6 @@ import socket
 import msvcrt, time
 import threading
 from tcp_by_size import send_with_size, recv_by_size
-
-# com1
 
 input_data = ""
 
@@ -39,7 +37,8 @@ class input_thread(threading.Thread):
             input_data = craft_message(input("Enter num: "))
             time.sleep(0.2)  # prevent busy waiting
 
-def craft_message(num):
+def craft_message(num_str):
+    num = int(num_str)
     if num == 1:
         return "PRVM|" + user_name + "|" + input("Enter target: ") + "|" + input("Enter message contents: ")
     elif num == 2:
@@ -82,16 +81,16 @@ def main(ip, user_name):
             elif (fields[0] == "PUBM"):
                 msg = fields[0] + "|" + fields[1] + "|" + fields[2]
             elif (fields[0] == "NUMG"):
-                msg = fields[0] + "|" + fields[1] + "|" + fields[2]
-            elif (fields[0] == "MAXG"):
                 msg = fields[0] + "|" + fields[1]
+            elif (fields[0] == "MAXG"):
+                msg = fields[0]
             elif (fields[0] == "SWIC"):
-                msg = fields[0] + "|" + fields[1] + "|" + fields[2]
+                msg = fields[0] + "|" + fields[1]
             send_with_size(cli_s, msg)
 
         try:
             data = recv_by_size(cli_s)
-            if data == "":
+            if (data is None or data == ""):
                 print("seems server DC")
                 break
             print("Got data >>> " + data)
@@ -101,6 +100,16 @@ def main(ip, user_name):
                 send_with_size(cli_s, "NAMR|" + user_name + ":" + user_name[::-1])
             elif msg_type == "MSGR":
                 print(fields[1] + ": " + fields[2])
+            elif msg_type == "NUMR":
+                print(f"User {fields[1]} number is: {fields[2]}")
+
+            elif msg_type == "SWIR":
+                global my_card_num
+                my_card_num = int(fields[1])
+                print(f"your num changed to: {my_card_num}")
+
+            elif msg_type == "ERRO":
+                print("error") # add err codes
 
         except socket.error as err:
 

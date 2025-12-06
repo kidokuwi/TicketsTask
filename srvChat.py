@@ -1,4 +1,4 @@
-__author__ = 'Yossi'
+__author__ = 'Yoav_Sarig_and_Ido_Keysar'
 import socket
 import time
 import threading
@@ -7,11 +7,13 @@ from  tcp_by_size import send_with_size ,recv_by_size
 from AsyncMessages import AsyncMessages
 
 async_msg = None
- 
+user_nums = {}
+
 EWOULDBLOCK = 10035
 
 def handle_message(data, user_name):
     global async_msg
+    global user_nums
 
     to_send = ""
 
@@ -24,11 +26,33 @@ def handle_message(data, user_name):
         for user in async_msg.sock_by_user.keys():
             if user != user_name:
                 async_msg.put_msg_by_user("MSGR|" + from_user + "|" + public_msg,user)
-    if msg_type == "PRVM":
+    elif msg_type == "PRVM":
         from_user = fields[1]
         to_user = fields[2]
         msg = fields[3]
         async_msg.put_msg_by_user("MSGR|" + from_user + "|" + msg,to_user)
+    elif msg_type == "NUMG":
+        target_user = fields[1]
+        if target_user in user_nums:
+            async_msg.put_msg_by_user("NUMR|" + target_user + "|" + str(user_nums[target_user]), user_name)
+        else:
+            async_msg.put_msg_by_user("ERRO|5|" + target_user, user_name)
+    elif msg_type == "MAXG":
+        max_user = max(user_nums, key=user_nums.get) if user_nums else "None"
+        max_num = user_nums.get(max_user, 0)
+        async_msg.put_msg_by_user("NUMR|" + max_user + "|" + str(max_num), user_name)
+    elif msg_type == "SWIC":
+        new_num_str = fields[1]
+        if new_num_str.isdigit():
+            user_nums[user_name] = int(new_num_str)
+
+            response_msg = "SWIR|" + new_num_str
+            async_msg.put_msg_by_user(response_msg, user_name)
+        else:
+            response_msg = "ERRO|6"
+            async_msg.put_msg_by_user(response_msg, user_name)
+
+
 
     return to_send
 
@@ -62,7 +86,7 @@ def handl_client(sock , tid):
     while not got_name:
         send_with_size(sock,to_send)
         data = recv_by_size(sock)
-        if data == "":
+        if data == "" or data is None:
             print ("Client disconnected")
             exit_thread = True
             break
