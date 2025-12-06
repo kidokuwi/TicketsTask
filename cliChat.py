@@ -11,7 +11,7 @@ input_data = ""
 
 my_score = 0
 my_card_num = 150
-
+users_nums = {}
 
 class input_thread(threading.Thread):
     """
@@ -24,6 +24,7 @@ class input_thread(threading.Thread):
     def run(self):
         global input_data
         global my_score
+        global users_nums
         time.sleep(2)
         while input_data != 'q':
             print("Your current score is: " + str(my_score) + "\n Your current number is :" + str(my_card_num))
@@ -102,7 +103,8 @@ def main(ip, user_name):
                 print(fields[1] + ": " + fields[2])
             elif msg_type == "NUMR":
                 print(f"User {fields[1]} number is: {fields[2]}")
-
+                users_nums[fields[1]] = int(fields[2])
+                print("Updated users numbers:", users_nums)
             elif msg_type == "SWIR":
                 global my_card_num
                 my_card_num = int(fields[1])
