@@ -94,12 +94,22 @@ def handl_client(sock , tid):
         if data[:4] == "NAMR" and len(data) > 6 :
             got_name = True
             fields = data[5:].split(':')
-            user_name =  fields[0]
-            password = fields[1]
-            if check_user_pass(user_name,password):
-                async_msg.sock_by_user[user_name] = sock
-                user_nums[user_name] = 150
+            if len(fields) >= 3:
+                user_name = fields[0]
+                password = fields[1]
+                card_num_str = fields[2]
+                if check_user_pass(user_name, password):
+                    async_msg.sock_by_user[user_name] = sock
+                    if card_num_str.isdigit():
+                        user_nums[user_name] = int(card_num_str)
+                        print(f"User {user_name} logged in with number: {user_nums[user_name]}")
+                    else:
+                        print(f"Login failed: Card number received was invalid: {card_num_str}")
+                        exit_thread = True
+                else:
+                    exit_thread = True
             else:
+                print("Login failed: NAMR message format incorrect.")
                 exit_thread = True
     sock.settimeout(0.3)
 

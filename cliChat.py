@@ -103,13 +103,17 @@ def main(ip, user_name):
             fields = data.split("|")
             msg_type = data[:4]
             if msg_type == "NAME":
-                send_with_size(cli_s, "NAMR|" + user_name + ":" + user_name[::-1])
+                msg = "NAMR|" + user_name + ":" + user_name[::-1] + ":" + str(my_card_num)
+                send_with_size(cli_s, msg)
             elif msg_type == "MSGR":
                 print(fields[1] + ": " + fields[2])
             elif msg_type == "NUMR":
                 print(f"User {fields[1]} number is: {fields[2]}")
-                users_nums[fields[1]] = int(fields[2])
-                print("Updated users numbers:", users_nums)
+                if (user_name != fields[1]):
+                    users_nums[fields[1]] = int(fields[2])
+                    print("Updated users numbers:", users_nums)
+                else:
+                    print("received own number, not updating users_nums")
             elif msg_type == "SWIR":
                 my_card_num = int(fields[1])
                 print(f"your num changed to: {my_card_num}")
