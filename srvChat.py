@@ -63,7 +63,6 @@ def check_user_pass(u,p):
     :param p:
     :return:
     """
-    print ("name:" + u + " pass:" + p + " checked")
     return True
 
 
@@ -99,10 +98,15 @@ def handl_client(sock , tid):
                 password = fields[1]
                 card_num_str = fields[2]
                 if check_user_pass(user_name, password):
-                    async_msg.sock_by_user[user_name] = sock
-                    if card_num_str.isdigit():
+                    print(user_name in async_msg.sock_by_user.keys())
+                    if user_name in async_msg.sock_by_user.keys():
+                        print("User already exists")
+                        send_with_size(sock,"EROR|002")
+                        exit_thread = True
+                    elif card_num_str.isdigit():
                         user_nums[user_name] = int(card_num_str)
                         print(f"User {user_name} logged in with number: {user_nums[user_name]}")
+                        async_msg.sock_by_user[user_name] = sock
                     else:
                         print(f"Login failed: Card number received was invalid: {card_num_str}")
                         exit_thread = True

@@ -9,11 +9,12 @@ import threading
 from tcp_by_size import send_with_size, recv_by_size
 
 input_data = ""
-
+lock = threading.Lock()
 my_score = 0
 my_card_num = 150
 users_nums = {}
-user_name = ""
+continuee = True
+user_nameglob = ""
 
 class input_thread(threading.Thread):
     """
@@ -28,8 +29,8 @@ class input_thread(threading.Thread):
         global my_score
         global users_nums
         time.sleep(2)
-        while input_data != 'q':
-            print("Your current score is: " + str(my_score) + "\n Your current number is :" + str(my_card_num))
+        while input_data != 'q' and continuee:
+            print("Your current score is: " + str(my_score) + "\nYour current number is :" + str(my_card_num))
             print("--------------------")
             print("1: Private message to...\n")
             print("2: Public message...\n")
@@ -37,16 +38,20 @@ class input_thread(threading.Thread):
             print("4: Request maximum number...\n")
             print("5: Change my number...\n")
             print("6: Exit...\n")
-            input_data = craft_message(input("Enter num: "))
-            time.sleep(0.2)  # prevent busy waiting
+            response = input("Enter your choice: ")
+            if (response.isdigit()):
+                input_data = craft_message(response)
+            else:
+                print("Invalid input, please try again")
+            time.sleep(0.2)
 
 def craft_message(num_str):
-    global user_name
+    global user_nameglob
     num = int(num_str)
     if num == 1:
-        return "PRVM|" + user_name + "|" + input("Enter target: ") + "|" + input("Enter message contents: ")
+        return "PRVM|" + user_nameglob + "|" + input("Enter target: ") + "|" + input("Enter message contents: ")
     elif num == 2:
-        return "PUBM|" + user_name + "|" + input("Enter message contents: ")
+        return "PUBM|" + user_nameglob + "|" + input("Enter message contents: ")
     elif num == 3:
         return "NUMG|" + input("Enter target user: ")
     elif num == 4:
@@ -59,8 +64,11 @@ def craft_message(num_str):
 
 def main(ip, user_name):
     global input_data
+    global continuee
     global my_score
     global my_card_num
+    global user_nameglob
+    user_nameglob = user_name
     my_card_num = random.randint(1,999)
 
     cli_s = socket.socket()
@@ -118,8 +126,15 @@ def main(ip, user_name):
                 my_card_num = int(fields[1])
                 print(f"your num changed to: {my_card_num}")
 
-            elif msg_type == "ERRO":
-                print("error") # add err codes
+            elif msg_type == "EROR":
+                lock.acquire()
+                if fields[1] == "001":
+                    print("General server error")
+                elif fields[1] == "002":
+                    print("Your user name already exists in server. Retry with another")
+                    continuee = False
+                    input_t.join()
+                lock.release()
 
         except socket.error as err:
 
@@ -148,5 +163,5 @@ if __name__ == "__main__":
         # exit()
     else:
         ip = argv[1]
-        user_name = argv[2]
-        main(ip, user_name)
+        user_nameglob = argv[2]
+        main(ip, user_nameglob)
