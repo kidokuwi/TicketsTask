@@ -51,7 +51,8 @@ def handle_message(data, user_name):
         else:
             response_msg = "ERRO|6"
             async_msg.put_msg_by_user(response_msg, user_name)
-
+    elif msg_type == "IWIN":
+        async_msg.put_msg_to_all("WINN|"+ user_name)
 
 
     return to_send

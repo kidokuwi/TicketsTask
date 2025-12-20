@@ -10,7 +10,6 @@ from tcp_by_size import send_with_size, recv_by_size
 
 input_data = ""
 lock = threading.Lock()
-my_score = 0
 my_card_num = 150
 users_nums = {}
 continuee = True
@@ -26,11 +25,10 @@ class input_thread(threading.Thread):
 
     def run(self):
         global input_data
-        global my_score
         global users_nums
         time.sleep(2)
         while input_data != 'q' and continuee:
-            print("Your current score is: " + str(my_score) + "\nYour current number is :" + str(my_card_num))
+            print("Your current score is: " + sum(users_nums) + "\nYour current number is :" + str(my_card_num))
             print("--------------------")
             print("1: Private message to...\n")
             print("2: Public message...\n")
@@ -65,7 +63,6 @@ def craft_message(num_str):
 def main(ip, user_name):
     global input_data
     global continuee
-    global my_score
     global my_card_num
     global user_nameglob
     user_nameglob = user_name
@@ -120,12 +117,18 @@ def main(ip, user_name):
                 if (user_name != fields[1]):
                     users_nums[fields[1]] = int(fields[2])
                     print("Updated users numbers:", users_nums)
+                    print("Current sum of all users numbers is: ", sum(users_nums))
+                    if (sum(users_nums) > 2000):
+                        msg = "IWIN|" + user_name
+                        send_with_size(cli_s, msg)
                 else:
                     print("received own number, not updating users_nums")
             elif msg_type == "SWIR":
                 my_card_num = int(fields[1])
                 print(f"your num changed to: {my_card_num}")
-
+            elif msg_type == "WINN":
+                print(f"User {fields[1]} has won the game!")
+                continuee = False
             elif msg_type == "EROR":
                 lock.acquire()
                 if fields[1] == "001":
@@ -155,6 +158,11 @@ def main(ip, user_name):
     print("Bye Bye from " + user_name)
     cli_s.close()
 
+def sum(user_nums):
+    s = 0
+    for n in user_nums.values():
+        s += n
+    return s
 
 if __name__ == "__main__":
     if len(argv) < 3:
