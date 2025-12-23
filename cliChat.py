@@ -1,6 +1,7 @@
 __author__ = 'Yoav_Sarig_and_Ido_Keysar'
 
 import random
+from operator import truediv
 from sys import argv
 
 import socket
@@ -28,7 +29,7 @@ class input_thread(threading.Thread):
         global users_nums
         time.sleep(2)
         while input_data != 'q' and continuee:
-            print("Your current score is: " + sum(users_nums) + "\nYour current number is :" + str(my_card_num))
+            print("Your current score is: " + str(sum(users_nums)) + "\nYour current number is: " + str(my_card_num))
             print("--------------------")
             print("1: Private message to...\n")
             print("2: Public message...\n")
@@ -55,7 +56,10 @@ def craft_message(num_str):
     elif num == 4:
         return "MAXG"
     elif num == 5:
-        return "SWIC|" + input("Enter new num: ")
+        inpt = input("Enter new num: ")
+        while not inpt.isdigit():
+            inpt = input("Invalid input. Please enter a number: ")
+        return "SWIC|" + inpt
     elif num == 6:
         return "q"
 
@@ -124,7 +128,9 @@ def main(ip, user_name):
                 else:
                     print("received own number, not updating users_nums")
             elif msg_type == "SWIR":
+                lock.acquire()
                 my_card_num = int(fields[1])
+                lock.release()
                 print(f"your num changed to: {my_card_num}")
             elif msg_type == "WINN":
                 print(f"User {fields[1]} has won the game!")

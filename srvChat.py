@@ -150,6 +150,7 @@ def handl_client(sock , tid):
         except Exception as err:
             print ("General Error:", err.message)
             break
+    del async_msg.sock_by_user[user_name]
     async_msg.delete_socket(sock)
     sock.close()
 
