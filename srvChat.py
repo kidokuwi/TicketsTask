@@ -3,6 +3,7 @@ import socket
 import time
 import threading
 
+import constants
 from  tcp_by_size import send_with_size ,recv_by_size
 from AsyncMessages import AsyncMessages
 
@@ -83,7 +84,7 @@ def handl_client(sock , tid):
     print ("New Client num " + str(tid))
     to_send = "NAME|<uname>:<pass>"
 
-    got_name = False;
+    got_name = False
     while not got_name:
         send_with_size(sock,to_send)
         data = recv_by_size(sock)
@@ -150,6 +151,10 @@ def handl_client(sock , tid):
         except Exception as err:
             print ("General Error:", err.message)
             break
+    if user_name in user_nums:
+        del user_nums[user_name]
+        print(f"User {user_name} removed from user_nums.")
+
     del async_msg.sock_by_user[user_name]
     async_msg.delete_socket(sock)
     sock.close()
@@ -161,7 +166,7 @@ def main ():
 
     s = socket.socket()
     async_msg = AsyncMessages()
-    s.bind(("0.0.0.0", 33446))
+    s.bind(("0.0.0.0", constants.port))
     s.listen(4)
     print ("after listen")
 

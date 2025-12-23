@@ -7,6 +7,8 @@ from sys import argv
 import socket
 import msvcrt, time
 import threading
+
+import constants
 from tcp_by_size import send_with_size, recv_by_size
 
 input_data = ""
@@ -75,7 +77,7 @@ def main(ip, user_name):
     cli_s = socket.socket()
     if not ip or len(ip) < 7:
         ip = "127.0.0.1"
-    cli_s.connect((ip, 33446))
+    cli_s.connect((ip, constants.port))
 
     cli_s.settimeout(0.3)
 
@@ -137,12 +139,16 @@ def main(ip, user_name):
                 continuee = False
             elif msg_type == "EROR":
                 lock.acquire()
-                if fields[1] == "001":
-                    print("General server error")
-                elif fields[1] == "002":
-                    print("Your user name already exists in server. Retry with another")
+                if fields[1] == "1":
+                    print(constants.USER_EXISTS_ERR)
+                elif fields[1] == "2":
+                    print(constants.USER_NOT_FOUND_ERR)
                     continuee = False
                     input_t.join()
+                elif fields[1] == "3":
+                    print(constants.NOT_A_NUMBER_ERR)
+                else:
+                    print(constants.GENERAL_SERVER_ERR)
                 lock.release()
 
         except socket.error as err:
