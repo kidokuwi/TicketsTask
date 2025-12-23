@@ -36,7 +36,7 @@ def handle_message(data, user_name):
         if target_user in user_nums:
             async_msg.put_msg_by_user("NUMR|" + target_user + "|" + str(user_nums[target_user]), user_name)
         else:
-            async_msg.put_msg_by_user("ERRO|5|" + target_user, user_name)
+            async_msg.put_msg_by_user("EROR|2|" + target_user, user_name)
     elif msg_type == "MAXG":
         max_user = max(user_nums, key=user_nums.get) if user_nums else "None"
         max_num = user_nums.get(max_user, 0)
@@ -49,7 +49,7 @@ def handle_message(data, user_name):
             response_msg = "SWIR|" + new_num_str
             async_msg.put_msg_by_user(response_msg, user_name)
         else:
-            response_msg = "ERRO|6"
+            response_msg = "EROR|3"
             async_msg.put_msg_by_user(response_msg, user_name)
     elif msg_type == "IWIN":
         async_msg.put_msg_to_all("WINN|"+ user_name)
@@ -102,7 +102,7 @@ def handl_client(sock , tid):
                     print(user_name in async_msg.sock_by_user.keys())
                     if user_name in async_msg.sock_by_user.keys():
                         print("User already exists")
-                        send_with_size(sock,"EROR|002")
+                        send_with_size(sock,"EROR|1")
                         exit_thread = True
                     elif card_num_str.isdigit():
                         user_nums[user_name] = int(card_num_str)
